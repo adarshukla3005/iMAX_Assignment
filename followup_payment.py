@@ -1,5 +1,28 @@
 import streamlit as st
 import requests
+import json
+import os
+
+def save_payment_data(data):
+    """Save payment follow-up details into a JSON file."""
+    file_path = "payment_followup.json"
+
+    # Load existing data if file exists
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                existing_data = []
+    else:
+        existing_data = []
+
+    # Append new payment details
+    existing_data.append(data)
+
+    # Save back to file
+    with open(file_path, "w") as f:
+        json.dump(existing_data, f, indent=4)
 
 def payment_followup(st, speak):
     st.subheader("💰 Payment Follow-Up")
@@ -17,6 +40,10 @@ def payment_followup(st, speak):
             "email": email,
         }
 
+        # Save data locally
+        save_payment_data(payment_details)
+
+        # Send request to Flask backend
         response = requests.post("http://127.0.0.1:5000/payment_followup", json=payment_details)
 
         if response.status_code == 200:
@@ -28,7 +55,6 @@ def payment_followup(st, speak):
                 st.error(response_data.get("error", "An error occurred!"))
             except requests.exceptions.JSONDecodeError:
                 st.error(f"Failed to decode JSON. Response: {response.text}")
-
 
 # Run Streamlit app
 if __name__ == "__main__":

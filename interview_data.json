@@ -1,0 +1,16 @@
+{
+    "name": "Adarsh",
+    "role": "Machine Learning Engineer",
+    "questions": [
+        "Namaste Adarsh! Please give a short introduction about yourself.",
+        "Toh aapne Roorkee se engineering ki hai.  Aapne apne final year project mein kaunsa Machine Learning algorithm use kiya tha aur kyun?",
+        "Aapne kaha ki aapne Roorkee se engineering ki hai aur auto segmentation ke liye algorithm use kiya hai.  Us algorithm mein aapne kis type ka supervised ya unsupervised learning approach use kiya tha aur kyun?",
+        "Aapne kaha ki aapne unsupervised learning ke liye decision trees use kiya tha auto segmentation ke liye.  Kya aap koi specific reason bata sakte hain kyun aapne kisi aur unsupervised learning algorithm jaise k-means clustering ya DBSCAN ko nahin chuna?"
+    ],
+    "answers": [
+        "Roorkee mein engineer",
+        "algorithm use kiya tha auto segmentation of",
+        "Maine usmein decision tree unsupervised learning ka use kiya tha decision trees Mein easily classification",
+        "camera clustering ka use kiya tha aur"
+    ]
+}

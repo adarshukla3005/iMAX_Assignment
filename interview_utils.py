@@ -1,14 +1,16 @@
 import streamlit as st
+import threading
+import requests
 import json
+from flask import Flask, request, jsonify
+from config import llm  # ✅ Import your LLM setup
 import speech_recognition as sr
+import pyttsx3
 from gtts import gTTS
 from pydub import AudioSegment
 from pydub.playback import play
-import os
 import time
-from config import llm  # ✅ Import your LLM setup
-
-# =================== Function Definitions =================== #
+import os
 
 def generate_question(job_role, previous_answers):
     """Generate the next question dynamically in Hinglish based on previous answers."""
@@ -27,6 +29,24 @@ def generate_question(job_role, previous_answers):
     except Exception as e:
         return f"Error generating question: {str(e)}"
 
+def evaluate_response(job_role, answer):
+    """Evaluate the candidate's response (stored in JSON but not displayed)."""
+    prompt = f"""
+    Tum ek AI interviewer ho jo {job_role} ke liye interview le raha hai.
+    Candidate ne ye jawab diya:
+    "{answer}"
+    Evaluation sirf Hinglish me likhna hai (Hindi + English in Latin script).
+    Tumhe candidate ke jawab ka short aur precise evaluation dena hai.
+    Ye batao ki jawab kahan weak tha aur kya missing tha.
+    Aur agar kuch acha jawab hain toh unhe bhi mention karo.
+    two line me crisp response do. Extra explanation mat do.
+    """
+    try:
+        response = llm.invoke([{"role": "user", "content": prompt}])
+        return response.strip() if isinstance(response, str) else response.get("content", "Error: No evaluation generated").strip()
+    except Exception as e:
+        return f"Error evaluating response: {str(e)}"
+
 def speak_text(text):
     """Generate and play TTS audio."""
     temp_audio_path = "tts_audio.mp3"
@@ -44,30 +64,14 @@ def save_interview_data():
         "name": st.session_state["candidate_name"],
         "role": st.session_state["selected_role"],
         "questions": st.session_state["questions"],
-        "answers": st.session_state["answers"]
+        "answers": st.session_state["answers"],
+        "evaluations": st.session_state["evaluations"]  # ✅ Hidden but stored
     }
-    with open("interview_data.json", "a") as f:
+    with open("interview_data.json", "w") as f:
         json.dump(data, f, indent=4)
-        f.write("\n")  # ✅ Append new interviews in a structured way
-
-def record_voice():
-    """Capture and return the user's voice input."""
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("🎤 Listening... Speak now!")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
-
-    try:
-        return recognizer.recognize_google(audio)
-    except sr.UnknownValueError:
-        return "❌ Could not understand the audio, please try again."
-    except sr.RequestError:
-        return "⚠️ Google Speech API not responding."
-
-# =================== 🌟 Streamlit UI =================== #
 
 def interview_screening():
+    # ============== 🌟 STREAMLIT UI ============== #
     st.title("🎙 AI-Powered Interviewer")
 
     job_roles = [
@@ -83,10 +87,11 @@ def interview_screening():
             st.session_state["session_id"] = f"{candidate_name}-{selected_role}"
             st.session_state["questions"] = []
             st.session_state["answers"] = []
+            st.session_state["evaluations"] = []
             st.session_state["interview_started"] = True
 
             # ✅ Start with Greeting + Introduction Request
-            greeting = f"Namaste {candidate_name}! Please give a short introduction about yourself."
+            greeting = f"Namustey {candidate_name}! Please give a short introduction about yourself."
             st.session_state["questions"].append(greeting)
             st.session_state["current_question"] = greeting
 
@@ -102,8 +107,21 @@ def interview_screening():
             st.write(f"🗣 **Your Answer:** {answer}")
 
         # ✅ Show the current question
-        if len(st.session_state["questions"]) < 5:
-            st.write(f"**Q{len(st.session_state['questions'])}:** {st.session_state['current_question']}")
+        st.write(f"**Q{len(st.session_state['questions'])}:** {st.session_state['current_question']}")
+
+        def record_voice():
+            recognizer = sr.Recognizer()
+            with sr.Microphone() as source:
+                st.write("🎤 Listening... Speak now!")
+                recognizer.adjust_for_ambient_noise(source)
+                audio = recognizer.listen(source)
+
+            try:
+                return recognizer.recognize_google(audio)
+            except sr.UnknownValueError:
+                return "❌ Could not understand the audio, please try again."
+            except sr.RequestError:
+                return "⚠️ Google Speech API not responding."
 
         if st.button("🎤 Speak Answer"):
             user_answer = record_voice()
@@ -111,30 +129,27 @@ def interview_screening():
             if "❌" in user_answer or "⚠️" in user_answer:
                 st.warning(user_answer)
             else:
+                # ✅ Store response
                 st.session_state["answers"].append(user_answer)
 
-                if len(st.session_state["questions"]) < 4:
+                if len(st.session_state["questions"]) == 1:
+                    # ✅ After introduction, ask job-related questions
+                    next_question = generate_question(st.session_state["selected_role"], [user_answer])
+                else:
+                    # ✅ Continue with logical next question
                     next_question = generate_question(st.session_state["selected_role"], st.session_state["answers"])
+
+                # ✅ Store evaluation but don't show it
+                evaluation = evaluate_response(st.session_state["selected_role"], user_answer)
+                st.session_state["evaluations"].append(evaluation)
+
+                if next_question:
                     st.session_state["questions"].append(next_question)
                     st.session_state["current_question"] = next_question
                     speak_text(next_question)
                 else:
-                    # ✅ If it's the 4th question, show Finish Interview button
-                    st.session_state["show_finish_button"] = True
-
-        if st.session_state.get("show_finish_button", False):
-            if st.button("✅ Finish Interview"):
-                final_message = "Aapka interview complete ho gaya hai. Hum aapko aage ke process ke baare mein inform karenge. Dhanyawad!"
-                st.write(f"🎉 **{final_message}**")
-                speak_text(final_message)
-
-                # ✅ Save the interview data
-                save_interview_data()
-
-                # ✅ Reset the session state for a new interview
-                time.sleep(2)
-                for key in ["interview_started", "questions", "answers", "session_id", "show_finish_button"]:
-                    st.session_state.pop(key, None)
+                    st.write("🎉 **Interview Completed!**")
+                    save_interview_data()
 
 if __name__ == "__main__":
     interview_screening()

@@ -11,24 +11,18 @@ from pydub import AudioSegment
 from pydub.playback import play
 import io
 import re
-import pytz
-import csv
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 import datetime
-import asyncio
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 import pygame
-from interview_utils import generate_question,evaluate_response,interview_screening
+from interview_utils import generate_question,evaluate_response
+from interview_screening import interview_screening
 from followup_payment import payment_followup
 from demo_scheduling import demo_scheduling
 import smtplib
 import ssl
 from email.message import EmailMessage
 from flask import Flask, request, jsonify
-import speech_recognition as sr  # Import speech recognition
-import pyttsx3  # Text-to-speech
+import speech_recognition as sr  # Import speech recognition  # Text-to-speech
 
 # Configure Gemini AI API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -37,29 +31,28 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 app = Flask(__name__)
 
 SCENARIOS = {
-    "demo_scheduling": "Aap ek professional sales agent hain. Seedha availability puchiye aur specific time slots suggest kijiye. Baatein kam, clarity zyada.",
-    "interview_screening": "Aap ek interviewer hain i MAX company se. Sirf relevant sawaal puchiye – candidate ka experience, skills aur suitability evaluate kijiye. Formal aur precise rahiye.",
+    "demo_scheduling": "Aap ek intelligent aur professional assistant hain jo Demo Scheduling, Interview Screening, aur Payment Follow-up ke liye tayyar hain. Namaskar! Aap apni demo meeting schedule karna chahte hain? Kripya apni availability bataye, aur main aapko available time slots suggest karungi aur fir kuch time slots dijiye jab user koi date bataye to. Short me answer dijiye.",
+    "interview_screening": "Sirf relevant sawaal puchiye candidate ka experience, skills aur suitability evaluate kijiye. Formal aur precise rahiye.",
     "payment_followup": "Aap ek payment collection agent hain. Pending payment ki polite yaad dilaiye, amount aur due date mention kariye. Tone professional aur courteous honi chahiye."
 }
 
 # Store scheduled meetings
 scheduled_meetings = []
 
-# Translator for Hinglish to Hindi conversion
+# Initialize Translator
 translator = GoogleTranslator(source="auto", target="hi")
 
-# Function to recognize speech from microphone
 def recognize_speech():
+    """Recognizes speech from microphone and returns text."""
     recognizer = sr.Recognizer()
-    
     with sr.Microphone() as source:
-        st.write("🎤 Listening... Speak now!")
+        print("🎤 Listening... Speak now!")
         
         # Reduce background noise dynamically
-        recognizer.adjust_for_ambient_noise(source, duration=1)  
+        recognizer.adjust_for_ambient_noise(source, duration=1)
 
         try:
-            audio = recognizer.listen(source, timeout=None)  # Wait for speech
+            audio = recognizer.listen(source, timeout=5, phrase_time_limit=15)  # Wait for speech
             text = recognizer.recognize_google(audio, language="en-IN")  # Recognize speech
             return text
         except sr.WaitTimeoutError:
@@ -71,14 +64,14 @@ def recognize_speech():
         except Exception as e:
             return f"Error: {e}"
 
-# Function to clean text (removes special characters)
 def clean_text(text):
+    """Cleans the text by removing special characters."""
     text = re.sub(r'[“”":,\'!@#$%^&*()_+=\[\]{}<>?/|\\]', '', text)  # Remove unwanted symbols
     text = text.replace('\n', ' ')  # Replace newlines with space
     return text
 
-# Function to Convert Hinglish Text to Hindi Speech
 def speak(text):
+    """Converts Hinglish text to Hindi speech and plays it."""
     try:
         text = clean_text(text)  # Clean input text
         hindi_text = translator.translate(text)  # Translate to Hindi
@@ -96,7 +89,7 @@ def speak(text):
         play(audio)
 
     except Exception as e:
-        st.error(f"Error in speech synthesis: {e}")
+        print(f"Error in speech synthesis: {e}")
 
 # Flask Route: AI Chatbot
 @app.route("/chat", methods=["POST"])
@@ -111,7 +104,7 @@ def chat():
 
     try:
         # Get the prompt based on the selected scenario
-        prompt = f"{SCENARIOS[scenario]} Answer in Hinglish.\nUser: {user_input}\nAgent:"
+        prompt = f"{SCENARIOS[scenario]} Answer in Hinglish.\nUser: {user_input}\n:"
         
         # Assuming genai.GenerativeModel("gemini-1.5-flash") works as expected
         model = genai.GenerativeModel("gemini-1.5-flash")
@@ -194,7 +187,7 @@ def send_email():
 
             <p>Best regards,</p>
             <p><strong>Adarsh Shukla</strong></p>
-            <p>iMAX Technologies</p>
+            <p>IIT Roorkee</p>
             <p>📞 +91-8707446780</p>
         </body>
         </html>
@@ -258,7 +251,7 @@ def send_demo_schedule():
 
             <p>Best regards,</p>
             <p><b>Adarsh Shukla</b></p>
-            <p>iMAX Technologies</p>
+            <p>IIT Roorkee</p>
             <p>+91-8707446780</p>
         </body>
         </html>
@@ -344,15 +337,23 @@ def run_flask():
 # Start Flask in a thread
 threading.Thread(target=run_flask, daemon=True).start()
 
-# Add Sidebar with Company Details
+# Sidebar - Company Details
 st.sidebar.title("iMAX Global")
 st.sidebar.write("Welcome to iMAX Technologies, a leader in AI-powered business solutions.")
 st.sidebar.write("At iMAX, we specialize in innovative AI applications that transform business processes and enhance operational efficiency.")
 st.sidebar.write("Our solutions span across industries including finance, healthcare, e-commerce, and more.")
 
+# Sidebar - Your Details
+st.sidebar.title("About Developer")
+st.sidebar.write("👤 **Adarsh Shukla**")
+st.sidebar.write("📞 Contact: 8707446780")
+
 # Streamlit UI
 st.title("Hinglish Cold Calling AI")
-scenario = st.selectbox("Select Scenario:", ["demo_scheduling", "interview_screening", "payment_followup"])
+scenario = st.selectbox(
+    "Select Scenario:",
+    ["Select a scenario", "demo_scheduling", "interview_screening", "payment_followup"]
+)
 
 # Streamlit UI
 st.title("AI Voice Assistant")
@@ -369,11 +370,15 @@ if st.button("Send"):
 
     if response.status_code == 200:
         ai_response = response.json().get("response", "No response from AI.")
+        
+        # Extract AI's pure response (remove "User:" part)
+        lines = ai_response.split("\n")
+        ai_speech_response = "\n".join(lines[1:]) if "User:" in lines[0] else ai_response
     else:
-        ai_response = f"Error: {response.json().get('error', 'Unknown error')}"
+        ai_speech_response = f"Error: {response.json().get('error', 'Unknown error')}"
 
     st.write("AI Response:", ai_response)
-    speak(ai_response)  # Speak AI Response
+    speak(ai_speech_response)  # Speak only AI's response
 
 
 # Initialize Pygame mixer for audio playback

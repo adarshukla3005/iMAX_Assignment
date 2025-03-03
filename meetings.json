@@ -191,5 +191,12 @@
         "date": "2025-03-03",
         "time": "11:00:00",
         "event_link": "https://www.google.com/calendar/event?eid=djMzbDZ0bWxuZmdwaHJyaDF2bTVoYnRhbGsgc2h1a2xhMzA1YWRhcnNoQG0"
+    },
+    {
+        "name": "Adarsh",
+        "email": "adarshukla3005@gmail.com",
+        "date": "2025-03-04",
+        "time": "06:00:00",
+        "event_link": "https://www.google.com/calendar/event?eid=Y2I3cDFpaGkzZmZ2Z21hNjlxbWZtc2pmMzQgc2h1a2xhMzA1YWRhcnNoQG0"
     }
 ]
