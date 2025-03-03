@@ -4,8 +4,8 @@ This is an AI-powered cold-calling assistant that helps with **demo scheduling, 
 
 ![Screenshot 2025-03-03 222903](https://github.com/user-attachments/assets/88a054ab-6e3a-45b9-8ee2-009d5f0a743a)
 
-## 📹 Video Tutorial  
-
+## 📹 Demonstration Video
+Watch the video:
 [![YouTube](https://img.shields.io/badge/Watch%20Tutorial-FF0000?style=for-the-badge&logo=YouTube&logoColor=white)](https://drive.google.com/file/d/1Lvmbiqy4ahlq8xrdmg9bIiHJ4RaBa0xo/view?usp=sharing)  
 
 ## Features  
