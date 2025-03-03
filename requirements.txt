@@ -1,0 +1,11 @@
+flask 
+streamlit 
+google-generativeai 
+langchain 
+speechrecognition 
+pydub 
+pyttsx3
+pyaudio
+googletrans==4.0.0-rc1
+indic-transliteration 
+gtts
