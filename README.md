@@ -67,6 +67,12 @@ myenv\Scripts\activate  # On Windows
 ```bash
 pip install -r requirements.txt
 ```
+
+- Install FFmpeg (Required for Pydub) and Add it to your environment variables.
+- Pydub requires FFmpeg to process audio files.
+
+🔗 Download [FFmpeg](https://ffmpeg.org/download.html) from here.
+
 ### 4. Configure API Keys
 
 Create a .env file in the project directory and add your API keys:
