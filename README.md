@@ -10,14 +10,17 @@ This is an AI-powered cold-calling assistant that helps with **demo scheduling, 
 
 ## Features  
 
-- **AI-Powered Conversations**: Uses Google Gemini AI for natural conversations in Hinglish.  
-- **Voice Interaction**: Speech-to-text input and AI-generated voice responses.  
-- **Demo Scheduling**: Uses Google Calendar API to schedule meetings.  
-- **Interview Screening**: AI conducts interviews with sequential questions and evaluates responses.  
-- **Payment Follow-ups**: Sends polite email reminders for pending payments.  
-- **Data Storage**: Stores scheduled meetings, interview responses, and follow-up details in JSON files.  
-- **Streamlit UI**: Interactive web-based interface for user interaction.  
-- **Flask API Backend**: Handles AI logic and integrates with external services.  
+- **AI-Powered Conversations**: ✅  |Uses Google Gemini AI for natural conversations in Hinglish.  
+- **Hinglish Handling**:        ✅  |Speech-to-text input and Text-to-Speech with AI-generated voice responses in Hinglish.  
+- **Demo Scheduling**:          ✅  |Uses Google Calendar API to schedule meetings.  
+- **Interview Screening**:      ✅  |AI conducts interviews with sequential questions and evaluates responses.  
+- **Payment Follow-ups**:       ✅  |Sends polite email reminders for pending payments.
+- **LLM Integration**:          ✅  |Integrated Google Gemini LLM Model
+- **Data Storage**:             ✅  |Stores scheduled meetings, interview responses, and follow-up details in JSON files.  
+- **Streamlit UI**:             ✅  |Interactive web-based interface for user interaction.  
+- **Flask API Backend**:        ✅  |Handles AI logic and integrates with external services.  
+- **Mongo DB**:                 ❌  |Couldn't implement due to lack of time.
+- **Deployment**:               ❌  |Could not deploy on docker
 
 ## Project Structure  
 
