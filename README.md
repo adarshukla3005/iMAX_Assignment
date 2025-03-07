@@ -125,10 +125,10 @@ This will open the web UI in your browser and start the Flask server on http://1
 4. For email errors, verify Gmail settings (use App Password if needed).
 
 ## Author
-Adarsh Shukla
-IIT Roorkee
-📧 Email: adarshukla3005@gmail.com
-📞 Contact: +91-8707446780
+- Adarsh Shukla
+- IIT Roorkee
+- Email: adarshukla3005@gmail.com
+- Contact: +91-8707446780
 
 
 
