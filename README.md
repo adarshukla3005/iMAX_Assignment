@@ -51,8 +51,7 @@ Follow these steps to set up and run the Hinglish Cold Calling AI:
 ### 1. Clone the Repository  
 
 ```bash
-git clone https://github.com/your-username/hinglish-cold-calling-ai.git
-cd hinglish-cold-calling-ai
+git clone https://github.com/adarshukla3005/iMAX_Assignment.git
 ```
 
 ### 2. Create Virtual Environment
