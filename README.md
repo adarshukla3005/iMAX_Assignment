@@ -58,8 +58,7 @@ git clone https://github.com/adarshukla3005/iMAX_Assignment.git
 
 ```bash
 python -m venv myenv
-source myenv/bin/activate  # On macOS/Linux
-myenv\Scripts\activate  # On Windows
+myenv\Scripts\activate
 ```
 
 ### 3. Install Dependencies
